@@ -8,11 +8,15 @@ from .models import Produk, Kategori , Status
 import requests
 import hashlib
 
+# Display the landing page. 
+# when button has click, it will seeding API to MySQL and display data in 'index.html'
 def landingpage(request):
     retrieve_data_from_api()
     template = loader.get_template("landing_page.html")
     return HttpResponse(template.render({}, request))
 
+# Display the table
+# Include ID, Name, Category, Status Product
 def renderhtml(request):
     produk = Produk.objects.all().filter(status=1)
     template = loader.get_template("index.html")
@@ -22,7 +26,8 @@ def renderhtml(request):
     
     return HttpResponse(template.render(context, request))
 
-
+# Display Add Page
+# To input data Manualy
 def add(request):
     kategori = Kategori.objects.all().values()
     status = Status.objects.all().values()
@@ -33,12 +38,13 @@ def add(request):
     }
     return HttpResponse(template.render(context, request))
 
+# To delete data manualy
 def delete (request, id):
     produk = Produk.objects.get(id=id)
     produk.delete()
     return HttpResponseRedirect(reverse('produk'))
 
-
+# To input data to database MySQL
 def addrecord(request):
     data_id_produk = request.POST["id"]
     data_nama_produk = request.POST["name"]
@@ -55,6 +61,7 @@ def addrecord(request):
     db.save()
     return HttpResponseRedirect(reverse('produk'))
 
+# Display Update Page
 def edit (request, id):
     produk = Produk.objects.get(id=id)
     kategori = Kategori.objects.all().values()
@@ -67,6 +74,7 @@ def edit (request, id):
     }
     return HttpResponse (template.render(context, request))
 
+# Updating data to database
 def edited (request, id):
     data_id_produk = request.POST["id"]
     data_nama_produk = request.POST["name"]
@@ -82,8 +90,7 @@ def edited (request, id):
     produk.save()
     return HttpResponseRedirect(reverse('produk'))
 
-
-
+# make username dynamic to login API
 def dynamic_username():
     now = datetime.now()+ timedelta(hours=1)
 
@@ -94,9 +101,7 @@ def dynamic_username():
     jam = now
     return username + tanggal + bulan + tahun + "C" + jam.strftime("%H")
 
-
-
-
+# make password dynamic to login API
 def dynamic_password():
     now = datetime.now() + timedelta(hours=1)
 
@@ -107,7 +112,7 @@ def dynamic_password():
     endcoded_password = password + "-" + tanggal + "-" + bulan + "-" + tahun
     return hashlib.md5(endcoded_password.encode()).hexdigest()
 
-
+# Get API data using request method
 def retrieve_data_from_api():
     url = "https://recruitment.fastprint.co.id/tes/api_tes_programmer"
     response = requests.post(
@@ -119,7 +124,6 @@ def retrieve_data_from_api():
         return api_data
     else:
         return None
-
 
 def produk_data(api_data):
     for data in api_data["data"]:
